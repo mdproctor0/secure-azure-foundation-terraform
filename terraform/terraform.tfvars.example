@@ -1,1 +1,32 @@
+# Example values for this deployment
+# Copy to terraform.tfvars and replace placeholders before running.
+
+# General
+location            = "centralus"
+resource_group_name = "rg-secure-foundation"
+
+# Networking
+vnet_name            = "vnet-secure-foundation"
+vnet_cidr            = "10.10.0.0/16"
+public_subnet_name   = "snet-public"
+public_subnet_cidr   = "10.10.1.0/24"
+private_subnet_name  = "snet-private"
+private_subnet_cidr  = "10.10.2.0/24"
+
+# Compute
+vm_name        = "vm-secure-foundation-01"
+vm_size        = "Standard_B1s"
+admin_username = "azureuser"
+
+# Optional if your code uses SSH keys (preferred)
+# admin_ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..."
+
+# Optional if your code uses passwords (not recommended)
+# admin_password = "ReplaceWithStrongPassword"
+
+# Logging
+log_analytics_workspace_name = "law-secure-foundation"
+
+# Storage
+storage_account_name = "stsecfoundation001" # must be globally unique, 3-24 lowercase letters/numbers
 
