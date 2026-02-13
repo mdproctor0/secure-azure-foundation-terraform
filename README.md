@@ -1,3 +1,5 @@
+<img width="1021" height="625" alt="Gemini_Generated_Image_xee4ihxee4ihxee4" src="https://github.com/user-attachments/assets/28120ec5-e8bb-4c07-a7da-f7ee43309166" />
+
 # Secure Azure Foundation (Terraform)
 
 ## Overview
@@ -59,3 +61,4 @@ terraform fmt -recursive
 terraform validate
 terraform plan -out tfplan
 terraform apply tfplan
+terraform destroy
