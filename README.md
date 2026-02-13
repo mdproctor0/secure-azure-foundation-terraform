@@ -1,4 +1,4 @@
-<img width="1021" height="625" alt="Gemini_Generated_Image_xee4ihxee4ihxee4" src="https://github.com/user-attachments/assets/28120ec5-e8bb-4c07-a7da-f7ee43309166" />
+<img width="1536" height="1024" alt="ChatGPT Image Feb 13, 2026 at 01_34_19 PM" src="https://github.com/user-attachments/assets/078c01b3-1c90-4d09-9ed2-8f709c149e96" />
 
 # Secure Azure Foundation (Terraform)
 
