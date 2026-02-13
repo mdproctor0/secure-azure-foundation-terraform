@@ -2,31 +2,30 @@
 ===============================================================================
 Secure Azure Foundation – Variable Definitions
 -------------------------------------------------------------------------------
-This file defines configurable inputs for the Terraform deployment.
+This file defines all configurable inputs for the Terraform deployment.
 
-Design Goals:
-- Avoid hardcoding values
-- Improve portability across environments
-- Enable safe customization without modifying core infrastructure code
-- Support future expansion (multi-region, scaling, modularization)
+Design Principles:
+- No hardcoded environment-specific values
+- Portability across regions and subscriptions
+- Secure-by-default configuration
+- Clear documentation for maintainability
+- Production-ready structure
 ===============================================================================
 */
 
 ###############################################################################
-# Global / Environment Configuration
+# Global Configuration
 ###############################################################################
 
 variable "location" {
-  description = <<DESCRIPTION
+  description = <<EOT
 Azure region where all resources will be deployed.
 
-Purpose:
-- Keeps infrastructure region-agnostic
-- Enables future multi-region deployments
-- Prevents hardcoding region values in resource blocks
+This variable ensures the infrastructure is region-agnostic and
+prevents hardcoding location values directly in resource blocks.
 
-Default: centralus
-DESCRIPTION
+Example: centralus
+EOT
 
   type    = string
   default = "centralus"
@@ -37,48 +36,42 @@ DESCRIPTION
 ###############################################################################
 
 variable "vnet_cidr" {
-  description = <<DESCRIPTION
+  description = <<EOT
 CIDR block for the Virtual Network (VNet).
 
-Purpose:
-- Defines the private address space for the secure environment
-- Serves as the network boundary for all deployed resources
-- Must not overlap with existing networks (VPN, on-prem, etc.)
+Defines the private address space boundary for the environment.
+Must not overlap with existing networks (VPN, ExpressRoute, or on-prem).
 
-Default: 10.10.0.0/16
-DESCRIPTION
+Example: 10.10.0.0/16
+EOT
 
   type    = string
   default = "10.10.0.0/16"
 }
 
 variable "public_subnet_cidr" {
-  description = <<DESCRIPTION
+  description = <<EOT
 CIDR block for the public subnet.
 
-Purpose:
-- Segment reserved for controlled ingress resources
-- Designed to remain restricted via NSGs
-- Included for architectural completeness and future expansion
+Reserved for controlled ingress resources. Even though labeled "public",
+all exposure is governed by Network Security Groups.
 
-Default: 10.10.1.0/24
-DESCRIPTION
+Example: 10.10.1.0/24
+EOT
 
   type    = string
   default = "10.10.1.0/24"
 }
 
 variable "private_subnet_cidr" {
-  description = <<DESCRIPTION
+  description = <<EOT
 CIDR block for the private subnet.
 
-Purpose:
-- Hosts sensitive resources (e.g., VM without public IP)
-- Not directly accessible from the internet
-- Supports secure-by-default architecture
+Intended for sensitive workloads that must not have direct internet
+exposure (e.g., virtual machines without public IPs).
 
-Default: 10.10.2.0/24
-DESCRIPTION
+Example: 10.10.2.0/24
+EOT
 
   type    = string
   default = "10.10.2.0/24"
@@ -89,64 +82,65 @@ DESCRIPTION
 ###############################################################################
 
 variable "vm_name" {
-  description = <<DESCRIPTION
-Name of the Linux virtual machine.
+  description = <<EOT
+Name assigned to the Linux virtual machine.
 
-Purpose:
-- Identifies the baseline secure compute instance
-- Used for monitoring, alerting, and logging context
-- Should follow naming standards in enterprise environments
+Used for identification, logging context, and monitoring alignment.
+Should follow consistent enterprise naming standards.
 
-Default: vm-secure-foundation-01
-DESCRIPTION
+Example: vm-secure-foundation-01
+EOT
 
   type    = string
   default = "vm-secure-foundation-01"
 }
 
 variable "admin_username" {
-  description = <<DESCRIPTION
+  description = <<EOT
 Administrator username for the Linux VM.
 
-Security Note:
-- Should not be 'root'
-- Access should occur via SSH key authentication only
-- Used for initial provisioning and management
+Security Requirements:
+- Must not be 'root'
+- SSH key authentication is enforced
+- Password-based login should remain disabled
 
-Default: azureuser
-DESCRIPTION
+Example: azureuser
+EOT
 
   type    = string
   default = "azureuser"
+
+  validation {
+    condition     = var.admin_username != "root"
+    error_message = "The administrator username cannot be 'root'."
+  }
 }
 
 variable "ssh_public_key_path" {
-  description = <<DESCRIPTION
+  description = <<EOT
 Path to the SSH public key used for VM authentication.
 
-Security Purpose:
-- Enforces passwordless authentication
-- Prevents brute-force password attacks
-- Aligns with cloud security best practices
+This variable intentionally has no default value to:
+- Avoid committing machine-specific file paths
+- Enforce explicit configuration
+- Support portability across environments
 
-This should point to a local .pub key file.
-DESCRIPTION
+Example:
+  ~/.ssh/id_rsa.pub
+EOT
 
-  type    = string
-  default = "~/.ssh/tf_azure_baseline_rsa.pub"
+  type = string
 }
 
 variable "vm_size" {
-  description = <<DESCRIPTION
+  description = <<EOT
 Azure VM size for the Linux instance.
 
-Purpose:
-- Controls CPU, memory, and cost
-- Can be adjusted depending on workload requirements
-- Default chosen for balanced performance and lab environments
+Determines compute resources and cost profile.
+Can be adjusted based on workload requirements.
 
 Example: Standard_D2s_v4
-DESCRIPTION
+EOT
 
   type    = string
   default = "Standard_D2s_v4"
