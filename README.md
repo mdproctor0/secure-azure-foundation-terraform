@@ -128,7 +128,7 @@ Planned improvements:
 - Convert to reusable Terraform modules
 - Introduce CI/CD pipeline validation
 
-- ## Engineering Considerations
+## Engineering Considerations
 
 Key design tradeoffs and observations:
 
