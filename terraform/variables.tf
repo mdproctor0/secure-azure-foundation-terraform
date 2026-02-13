@@ -77,6 +77,20 @@ EOT
   default = "10.10.2.0/24"
 }
 
+variable "bastion_subnet_cidr" {
+  description = <<EOT
+CIDR block for the Azure Bastion subnet.
+
+Azure Bastion requires a dedicated subnet named 'AzureBastionSubnet'.
+A /26 or larger is commonly used.
+
+Example: 10.10.3.0/26
+EOT
+
+  type    = string
+  default = "10.10.3.0/26"
+}
+
 ###############################################################################
 # Compute Configuration
 ###############################################################################
