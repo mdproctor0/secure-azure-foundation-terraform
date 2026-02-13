@@ -7,7 +7,19 @@ This repository provisions a secure, repeatable baseline in Microsoft Azure usin
 
 This project is designed as a foundational security lab and portfolio artifact. It demonstrates infrastructure-as-code discipline, secure-by-default design, and basic operational telemetry via centralized logging and alerting.
 
-## What This Deploys
+## Project Status
+
+Status: Fully deployed and validated in Azure
+
+Validated Controls:
+- Private VM with no public IP
+- Subnet-level NSG enforcement
+- Explicit inbound deny from Internet
+- Controlled outbound via NAT Gateway
+- Log ingestion verified in Log Analytics
+- Syslog events observable for detection testing
+-
+- ## What This Deploys
 - Resource Group (environment lifecycle and cost boundary)
 - Virtual Network (private address space boundary)
 - Public and private subnets (network segmentation)
@@ -27,6 +39,21 @@ High-level flow:
 - Administrative access is intended through Azure Bastion (no direct inbound SSH from the internet).
 - Logs are sent to Log Analytics for visibility and detection.
 
+### Architecture Diagram
+
+The following diagram represents the deployed secure baseline architecture:
+
+<img width="1536" height="1024" alt="ChatGPT Image Feb 13, 2026 at 01_01_39 PM" src="https://github.com/user-attachments/assets/9aac08f3-f292-4e59-9b6e-93259ae0dc89" />
+
+### High-Level Flow
+
+Internet → NAT Gateway (Outbound Only) → Private Subnet (snet-private) → Linux VM (No Public IP)
+
+Administrative Access Model:
+- No direct internet exposure
+- Controlled access patterns (Bastion / Private Connectivity)
+- Subnet-level NSG enforcement
+
 ## Security Controls and Rationale
 
 ### No public IP on the VM
@@ -44,6 +71,28 @@ Private workloads often require outbound internet access (updates, package repos
 ### Centralized logging (Log Analytics)
 A baseline without telemetry is not defensible. Log Analytics provides centralized visibility for investigation, auditing, and future detections.
 
+## Security Validation Results
+
+The following validations confirm the secure-by-default posture:
+
+### Network Isolation
+- VM deployed in private subnet
+- No public IP attached
+- Inbound internet traffic explicitly denied via NSG
+
+### Controlled Egress
+- Private subnet uses NAT Gateway
+- Outbound internet allowed without inbound exposure
+
+### Centralized Logging
+- Azure Monitor Agent installed
+- Syslog ingestion validated via Log Analytics query
+
+### Detection Capability
+-Authpriv Syslog events successfully ingested and queryable
+-Security-relevant log activity observable in centralized workspace
+-Alert rule configured to trigger on monitored security events
+
 ## Repository Layout
 Terraform configuration lives in the `terraform/` directory.
 
@@ -58,6 +107,39 @@ Terraform configuration lives in the `terraform/` directory.
 - `outputs.tf` – key outputs for validation and integration
 - `terraform.tfvars.example` – example variable overrides (safe to commit)
 
+## Why This Matters
+
+Cloud environments frequently fail due to:
+
+- Accidental public IP exposure
+- Overly permissive network rules
+- Lack of centralized logging
+- Weak outbound control
+
+This project demonstrates how to reduce those risks using infrastructure-as-code and secure-by-default design principles.
+
+## Future Enhancements
+
+Planned improvements:
+
+- Enforce diagnostic settings on all resources
+- Add Azure Policy for baseline enforcement
+- Implement Defender for Cloud recommendations
+- Convert to reusable Terraform modules
+- Introduce CI/CD pipeline validation
+
+- ## Engineering Considerations
+
+Key design tradeoffs and observations:
+
+- NAT Gateway provides outbound-only internet access while preserving inbound isolation.
+- Subnet-level NSG enforcement reduces blast radius compared to NIC-level rules.
+- Log Analytics provides rapid validation of telemetry ingestion during testing.
+- Azure Monitor Agent (AMA) is required for modern log collection pipelines.
+- Explicit deny rules improve security clarity despite Azure default deny behavior.
+
+This baseline can be expanded into a production-ready landing zone using modular Terraform architecture.
+  
 ## Prerequisites
 - Azure subscription with permissions to create:
   - Resource Group, VNet/Subnets/NSGs, NAT, Bastion, VM, Log Analytics
@@ -76,3 +158,4 @@ terraform fmt -recursive
 terraform validate
 terraform plan -out tfplan
 terraform apply tfplan
+
