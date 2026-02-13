@@ -2,21 +2,19 @@
 ===============================================================================
 Secure Azure Foundation – Core Infrastructure
 -------------------------------------------------------------------------------
-This file defines foundational infrastructure resources that serve as the
-lifecycle boundary for the secure environment.
+Defines the primary lifecycle boundary for this environment.
 
 Scope:
-- Resource Group (primary deployment boundary)
+- Resource Group (deployment, management, and cost boundary)
 
-Design Rationale:
-- The Resource Group acts as the management and cost boundary
-- All resources are deployed within this group
-- Enables simplified teardown and environment isolation
+Design Notes:
+- All resources in this baseline are deployed into this Resource Group
+- Enables clean environment isolation and simplified teardown
 ===============================================================================
 */
 
 ###############################################################################
-# Resource Group (Lifecycle Boundary)
+# Resource Group
 ###############################################################################
 
 resource "azurerm_resource_group" "rg" {
