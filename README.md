@@ -1,145 +1,61 @@
-# Secure Azure Foundation with Terraform and Detection Validation
+# Secure Azure Foundation (Terraform)
 
-## Project Overview
+## Overview
+This repository provisions a repeatable, security-oriented baseline in Microsoft Azure using Terraform. The goal is to establish a hardened “starter platform” that reduces common cloud failure modes such as unintended internet exposure, overly permissive network rules, weak storage defaults, and insufficient logging.
 
-This project implements a secure, repeatable Azure infrastructure baseline using Terraform and validates security monitoring through simulated privileged access activity.
+This project was designed as a foundational security lab and portfolio artifact. It demonstrates infrastructure-as-code, secure-by-default design choices, and operational visibility through centralized logging and alerting.
 
-The objective was to design and deploy a hardened cloud environment that eliminates common failure modes commonly seen in cloud security incidents:
+## Architecture
+Provisioned components include:
 
-- Unintended internet exposure  
-- Overly permissive network rules  
-- Weak service defaults  
-- Lack of centralized logging and visibility  
+- Resource Group: lifecycle boundary for the environment
+- Virtual Network (VNet): private network boundary
+- Subnets: public and private segmentation
+- Network Security Groups (NSGs): least-privilege traffic controls
+- Linux VM: deployed without a public IP (private-by-default posture)
+- Log Analytics Workspace: centralized telemetry sink
+- Azure Monitor / Log Analytics queries: validation of log ingestion
+- Alert rule: detection of `authpriv` Syslog events (lab signal)
 
-After deploying the secure baseline, detection engineering was layered on top to validate monitoring capability.
+## Security Design Decisions
+### No public IP on the VM
+The Linux VM is deployed without a public IP to reduce exposure to common opportunistic attacks (SSH brute force, password spraying, vulnerability scanning). Administrative access is intended to be handled through controlled mechanisms such as Bastion, jump hosts, or private connectivity (implementation depends on environment requirements).
 
----
+### Network segmentation with NSGs
+Subnets and NSGs are used to establish a controlled network boundary with a least-privilege mindset. Inbound access is restricted and defaults to deny unless explicitly required.
 
-## Phase 1 — Secure Azure Foundation (Infrastructure as Code)
+### Centralized logging
+Log Analytics is used to centralize platform telemetry. This supports investigation workflows, basic detections, and auditability.
 
-### Architecture Components
+## Repository Layout
+The Terraform configuration is located in the `terraform/` directory.
 
-- Resource Group — Lifecycle boundary for all resources  
-- Virtual Network (VNet) — Private network boundary  
-- Public Subnet — Controlled ingress segment  
-- Private Subnet — Non-internet-facing segment  
-- Network Security Groups (NSGs) — Least privilege traffic enforcement  
-- Linux Virtual Machine (No Public IP) — Default secure posture  
-- Secure Storage Account — Hardened configuration  
-- Log Analytics Workspace — Centralized telemetry and monitoring  
+Common files:
+- `main.tf`: foundational resources and orchestration
+- `network.tf`: VNet, subnets, and network configuration
+- `security.tf`: NSGs and security controls
+- `compute.tf`: VM and compute resources
+- `bastion.tf`: optional Bastion-related resources (if enabled)
+- `providers.tf`: provider configuration
+- `versions.tf`: required Terraform/provider versions
+- `variables.tf`: input variables
+- `outputs.tf`: key outputs for validation and integration
+- `terraform.tfvars.example`: example variable values template (safe to commit)
 
----
+## Prerequisites
+- Azure subscription with permissions to create resources (Resource Group, Networking, Compute, Log Analytics)
+- Terraform installed
+- Azure CLI installed and authenticated:
+  - `az login`
+- An SSH keypair (public key path referenced by variables)
 
-## Security Controls Implemented
-
-| Control | Purpose | Risk Mitigated |
-|----------|----------|----------------|
-| No Public IP on VM | Default secure stance | Prevents brute-force and direct internet exposure |
-| Least Privilege NSGs | Restricts inbound and outbound traffic | Reduces attack surface |
-| Centralized Logging | Enables visibility and investigations | Eliminates monitoring blind spots |
-| Secure Storage Defaults | Protects data services | Prevents data exfiltration |
-| Infrastructure as Code | Controlled, reviewable changes | Prevents configuration drift |
-
----
-
-## Terraform Design Model
-
-Infrastructure was defined declaratively using Terraform:
-
-```
-Desired State → Plan → Apply → State Tracking
-```
-
-Terraform builds infrastructure as a dependency graph in the following order:
-
-1. Resource Group  
-2. Virtual Network  
-3. Subnets  
-4. Network Security Groups  
-5. NSG Associations  
-6. Network Interface (Private Subnet)  
-7. Linux Virtual Machine  
-8. Storage Account  
-9. Log Analytics Workspace  
-
-All changes were validated using `terraform plan` prior to deployment.
-
----
-
-## Phase 2 — Detection Engineering Validation
-
-After the secure foundation was deployed, logging and detection capabilities were validated.
-
-### Threat Scenario
-
-Simulated unauthorized privileged access attempt:
+## Usage
+From the repository root:
 
 ```bash
-logger -p authpriv.err "Security Test: Unauthorized Access Attempt"
-```
-
-Logs were ingested via Azure Monitor Agent into Log Analytics.
-
----
-
-## Detection Query (KQL)
-
-```kql
-Syslog
-| where Facility == "authpriv"
-| where SyslogMessage contains "Unauthorized"
-| summarize AttemptCount = count() by Computer, bin(TimeGenerated, 5m)
-| where AttemptCount >= 1
-| sort by TimeGenerated desc
-```
-
----
-
-## Alert Rule Configuration
-
-- Scheduled query alert  
-- Evaluation frequency: 5 minutes  
-- Trigger condition: Results greater than 0  
-- Alert successfully fired during validation testing  
-
----
-
-## MITRE ATT&CK Mapping
-
-- T1078 — Valid Accounts  
-- TA0006 — Credential Access  
-- TA0004 — Privilege Escalation  
-
----
-
-## Architecture Principles Applied
-
-- Zero direct internet exposure  
-- Least privilege networking  
-- Defense in depth  
-- Infrastructure as Code  
-- Threat-informed detection  
-- Observability-first design  
-
----
-
-## Future Improvements
-
-- Remote Terraform state backend  
-- Terraform module refactoring  
-- Automated incident response integration  
-- Flow logs and network analytics  
-- Baseline anomaly detection  
-
----
-
-## Skills Demonstrated
-
-- Azure Networking Architecture  
-- Infrastructure as Code (Terraform)  
-- Secure Cloud Design  
-- Azure Monitor and Log Analytics  
-- KQL Detection Engineering  
-- Alert Engineering  
-- Threat Modeling  
-- MITRE ATT&CK Mapping  
+cd terraform
+terraform init
+terraform fmt -recursive
+terraform validate
+terraform plan -out tfplan
+terraform apply tfplan
