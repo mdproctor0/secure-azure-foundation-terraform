@@ -159,3 +159,23 @@ EOT
   type    = string
   default = "Standard_D2s_v4"
 }
+
+
+###############################################################################
+# Bastion
+###############################################################################
+
+variable "bastion_subnet_cidr" {
+  description = <<DESCRIPTION
+CIDR block for the Azure Bastion subnet.
+
+Requirements:
+- The subnet name must be "AzureBastionSubnet"
+- /26 or larger is recommended/required for Bastion
+
+Default: 10.10.3.0/26
+DESCRIPTION
+
+  type    = string
+  default = "10.10.3.0/26"
+}
