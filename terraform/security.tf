@@ -1,17 +1,18 @@
 /*
 ===============================================================================
-Secure Azure Foundation – Security Controls
+Secure Azure Foundation – Network Security Controls
 -------------------------------------------------------------------------------
-This file defines network security boundaries for the secure foundation.
+Defines Network Security Groups (NSGs) and subnet associations for the secure
+foundation.
 
-Scope:
-- Network Security Groups (NSGs) for public and private subnets
-- Least-privilege inbound posture (deny internet inbound explicitly)
+Security Posture:
+- Explicitly deny inbound traffic from the Internet (defense-in-depth)
+- Private subnet does not permit inbound administrative access from the public
+- Outbound is allowed (egress is handled via NAT Gateway for the private subnet)
 
-Note:
-Monitoring resources are currently included here for simplicity but should be
-moved to a dedicated monitoring/logging file (e.g., monitoring.tf) in a
-production repository.
+Rationale:
+Azure provides default system rules. Explicit deny rules reduce the risk of
+future accidental exposure caused by permissive rules added later.
 ===============================================================================
 */
 
@@ -20,31 +21,33 @@ production repository.
 ###############################################################################
 
 resource "azurerm_network_security_group" "public" {
-  name                = "nsg-public"
+  name                = "nsg-public-secure-foundation"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   tags = {
-    environment = "secure-foundation"
-    component   = "nsg"
+    environment = "secure-baseline"
+    managed_by  = "terraform"
+    component   = "network-security"
     subnet      = "public"
   }
 }
 
 resource "azurerm_network_security_group" "private" {
-  name                = "nsg-private"
+  name                = "nsg-private-secure-foundation"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   tags = {
-    environment = "secure-foundation"
-    component   = "nsg"
+    environment = "secure-baseline"
+    managed_by  = "terraform"
+    component   = "network-security"
     subnet      = "private"
   }
 }
 
 ###############################################################################
-# NSG Associations (Subnet-Level Enforcement)
+# Subnet Associations (Subnet-Level Enforcement)
 ###############################################################################
 
 resource "azurerm_subnet_network_security_group_association" "public" {
@@ -62,7 +65,7 @@ resource "azurerm_subnet_network_security_group_association" "private" {
 ###############################################################################
 
 resource "azurerm_network_security_rule" "public_deny_internet_inbound" {
-  name                        = "deny-internet-inbound-public"
+  name                        = "deny-internet-inbound"
   priority                    = 100
   direction                   = "Inbound"
   access                      = "Deny"
@@ -76,7 +79,7 @@ resource "azurerm_network_security_rule" "public_deny_internet_inbound" {
 }
 
 resource "azurerm_network_security_rule" "private_deny_internet_inbound" {
-  name                        = "deny-internet-inbound-private"
+  name                        = "deny-internet-inbound"
   priority                    = 100
   direction                   = "Inbound"
   access                      = "Deny"
@@ -87,40 +90,4 @@ resource "azurerm_network_security_rule" "private_deny_internet_inbound" {
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.rg.name
   network_security_group_name = azurerm_network_security_group.private.name
-}
-
-###############################################################################
-# Logging Baseline (Log Analytics Workspace)
-###############################################################################
-
-resource "azurerm_log_analytics_workspace" "law" {
-  name                = "law-secure-foundation"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  sku               = "PerGB2018"
-  retention_in_days = 30
-
-  tags = {
-    environment = "secure-foundation"
-    component   = "logging"
-  }
-}
-
-###############################################################################
-# Azure Monitor Agent (Linux VM Extension)
-###############################################################################
-
-resource "azurerm_virtual_machine_extension" "ama" {
-  name                       = "AzureMonitorLinuxAgent"
-  virtual_machine_id         = azurerm_linux_virtual_machine.vm.id
-  publisher                  = "Microsoft.Azure.Monitor"
-  type                       = "AzureMonitorLinuxAgent"
-  type_handler_version       = "1.9"
-  auto_upgrade_minor_version = true
-
-  tags = {
-    environment = "secure-foundation"
-    component   = "monitoring"
-  }
 }
