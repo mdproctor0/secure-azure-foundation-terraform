@@ -1,35 +1,28 @@
-# Example values for this deployment
-# Copy to terraform.tfvars and replace placeholders before running.
+/*
+===============================================================================
+Secure Azure Foundation – Example Variable Overrides
+-------------------------------------------------------------------------------
+This file demonstrates how environment-specific values can override defaults
+defined in variables.tf.
 
-# General
-location            = "centralus"
-resource_group_name = "rg-secure-foundation"
+Do NOT commit real secrets.
+Copy this file to terraform.tfvars for local development if needed.
+===============================================================================
+*/
 
-# Networking
-vnet_name            = "vnet-secure-foundation"
-vnet_cidr            = "10.10.0.0/16"
-public_subnet_name   = "snet-public"
-public_subnet_cidr   = "10.10.1.0/24"
-private_subnet_name  = "snet-private"
-private_subnet_cidr  = "10.10.2.0/24"
+# Deployment region
+location = "centralus"
 
-# Compute
-vm_name        = "vm-secure-foundation-01"
-vm_size        = "Standard_B1s"
-admin_username = "azureuser"
-
-# Bastion
+# Networking configuration
+vnet_cidr           = "10.10.0.0/16"
+public_subnet_cidr  = "10.10.1.0/24"
+private_subnet_cidr = "10.10.2.0/24"
 bastion_subnet_cidr = "10.10.3.0/26"
 
-# Optional if your code uses SSH keys (preferred)
-# admin_ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..."
+# VM configuration
+vm_name        = "vm-secure-foundation-01"
+vm_size        = "Standard_D2s_v4"
+admin_username = "azureuser"
 
-# Optional if your code uses passwords (not recommended)
-# admin_password = "ReplaceWithStrongPassword"
-
-# Logging
-log_analytics_workspace_name = "law-secure-foundation"
-
-# Storage
-storage_account_name = "stsecfoundation001" # must be globally unique, 3-24 lowercase letters/numbers
-
+# SSH key path (update locally as needed)
+ssh_public_key_path = "~/.ssh/tf_azure_baseline_rsa.pub"
