@@ -2,12 +2,13 @@
 ===============================================================================
 Secure Azure Foundation – Compute Configuration
 -------------------------------------------------------------------------------
-This file provisions the baseline Linux compute instance with secure defaults.
+Provisions the baseline Linux VM using secure defaults.
 
-Security Rationale:
-- VM is deployed without a public IP (private-by-default)
+Security Posture:
+- No public IP (private-by-default)
 - SSH key authentication only (password authentication disabled)
-- NIC is placed in the private subnet to reduce exposure
+- NIC placed in private subnet to reduce exposure
+- Intended access path: Azure Bastion (or private connectivity)
 ===============================================================================
 */
 
@@ -16,13 +17,13 @@ Security Rationale:
 ###############################################################################
 
 resource "azurerm_network_interface" "vm_nic" {
-  name                = "nic-${var.vm_name}"
+  name                = "${var.vm_name}-nic"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   # No public IP is attached. Access is intended via Bastion or private connectivity.
   ip_configuration {
-    name                          = "ipconfig-private"
+    name                          = "primary"
     subnet_id                     = azurerm_subnet.private.id
     private_ip_address_allocation = "Dynamic"
   }
@@ -30,6 +31,7 @@ resource "azurerm_network_interface" "vm_nic" {
   tags = {
     environment = "secure-foundation"
     component   = "compute"
+    managed_by  = "terraform"
   }
 }
 
@@ -39,10 +41,10 @@ resource "azurerm_network_interface" "vm_nic" {
 
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = var.vm_name
+  computer_name       = var.vm_name
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-
-  size = var.vm_size
+  size                = var.vm_size
 
   admin_username                  = var.admin_username
   disable_password_authentication = true
@@ -72,5 +74,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
   tags = {
     environment = "secure-foundation"
     component   = "compute"
+    managed_by  = "terraform"
   }
 }
