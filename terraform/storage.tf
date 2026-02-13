@@ -1,22 +1,21 @@
 /*
 ===============================================================================
-Secure Azure Foundation – Storage Configuration
+Secure Azure Foundation – Hardened Storage Configuration
 -------------------------------------------------------------------------------
-This file provisions a hardened Azure Storage Account.
+This storage account is restricted to private network access only.
 
-Security Objectives:
-- Prevent anonymous public access
-- Enforce HTTPS-only traffic
-- Require minimum TLS 1.2
-- Disable public blob access
-- Align with secure-by-default cloud principles
+Security Controls Implemented:
+- TLS 1.2 enforced
+- HTTPS-only traffic
+- Public blob access disabled
+- Public network access disabled
+- Access restricted to private subnet
+- System-assigned managed identity enabled
 
-Storage is a frequent breach vector in Azure environments due to:
-- Public containers
-- Misconfigured access policies
-- Weak transport enforcement
-
-This configuration reduces those risks.
+This configuration mitigates:
+- Public data exposure
+- Accidental anonymous access
+- Credential interception via insecure transport
 ===============================================================================
 */
 
@@ -27,13 +26,23 @@ resource "azurerm_storage_account" "secure" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
 
-  min_tls_version                 = "TLS1_2"
-  allow_blob_public_access        = false
-  public_network_access_enabled   = true
-  enable_https_traffic_only       = true
+  min_tls_version               = "TLS1_2"
+  allow_blob_public_access      = false
+  public_network_access_enabled = false
+  enable_https_traffic_only     = true
 
   identity {
     type = "SystemAssigned"
+  }
+
+  network_rules {
+    default_action = "Deny"
+
+    virtual_network_subnet_ids = [
+      azurerm_subnet.private.id
+    ]
+
+    bypass = ["AzureServices"]
   }
 
   tags = {
