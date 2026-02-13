@@ -1,57 +1,52 @@
 /*
 ===============================================================================
-Secure Azure Foundation – Bastion Configuration
+Secure Azure Foundation – Azure Bastion
 -------------------------------------------------------------------------------
-This file provisions Azure Bastion to enable secure administrative access
-to virtual machines without exposing them via public IP addresses.
+Azure Bastion provides secure administrative access to private VMs without
+exposing SSH/RDP to the public internet.
 
-Security Rationale:
-- Eliminates direct SSH exposure to the internet
-- Enables browser-based secure access
-- Reduces attack surface
-- Supports zero-public-VM architecture
+Design Intent:
+- No public IP on the VM
+- Admin access occurs through Bastion over TLS (via the Azure portal)
+- Bastion requires:
+  - A dedicated subnet named "AzureBastionSubnet"
+  - A Standard, Static Public IP
 ===============================================================================
 */
 
-###############################################################################
-# Public IP for Azure Bastion
-###############################################################################
-
-resource "azurerm_public_ip" "bastion_public_ip" {
-  name                = "pip-bastion"
+resource "azurerm_public_ip" "bastion_pip" {
+  name                = "pip-bastion-secure-foundation"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
-  allocation_method   = "Static"
-  sku                 = "Standard"
+  allocation_method = "Static"
+  sku               = "Standard"
 
   tags = {
-    environment = "secure-foundation"
-    component   = "bastion"
+    environment = "secure-baseline"
+    managed_by  = "terraform"
   }
 }
 
-###############################################################################
-# Azure Bastion Host
-###############################################################################
-
-resource "azurerm_bastion_host" "bastion_host" {
+resource "azurerm_bastion_host" "bastion" {
   name                = "bas-secure-foundation"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
-  # Basic SKU is sufficient for controlled lab environments.
-  # Production environments may require Standard for advanced features.
+  /*
+    Basic is acceptable for labs.
+    Standard adds additional capabilities and scaling features.
+  */
   sku = "Basic"
 
   ip_configuration {
     name                 = "bastion-ipconfig"
     subnet_id            = azurerm_subnet.bastion.id
-    public_ip_address_id = azurerm_public_ip.bastion_public_ip.id
+    public_ip_address_id = azurerm_public_ip.bastion_pip.id
   }
 
   tags = {
-    environment = "secure-foundation"
-    component   = "bastion"
+    environment = "secure-baseline"
+    managed_by  = "terraform"
   }
 }
