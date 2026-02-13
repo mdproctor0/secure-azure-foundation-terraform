@@ -18,6 +18,9 @@ vm_name        = "vm-secure-foundation-01"
 vm_size        = "Standard_B1s"
 admin_username = "azureuser"
 
+# Bastion
+bastion_subnet_cidr = "10.10.3.0/26"
+
 # Optional if your code uses SSH keys (preferred)
 # admin_ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..."
 
