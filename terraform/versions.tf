@@ -2,26 +2,28 @@
 ===============================================================================
 Secure Azure Foundation – Terraform & Provider Version Constraints
 -------------------------------------------------------------------------------
-This file pins Terraform and provider versions to ensure consistent behavior
-across machines and over time.
+Defines required Terraform and provider versions to ensure deterministic
+behavior across environments.
 
-Rationale:
-- Prevents unexpected breaking changes from provider upgrades
-- Ensures predictable initialization and deployments
+Purpose:
+- Prevent unexpected breaking changes
+- Maintain consistent deployments across machines
+- Enforce controlled provider upgrades
 ===============================================================================
 */
 
 terraform {
   required_version = ">= 1.5.0"
 
-   required_providers {
+  required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.100"
     }
-  
+
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"
     }
+  }
 }
