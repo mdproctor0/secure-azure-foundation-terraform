@@ -18,7 +18,7 @@ Validated Controls:
 - Controlled outbound via NAT Gateway
 - Log ingestion verified in Log Analytics
 - Syslog events observable for detection testing
--
+
 - ## What This Deploys
 - Resource Group (environment lifecycle and cost boundary)
 - Virtual Network (private address space boundary)
