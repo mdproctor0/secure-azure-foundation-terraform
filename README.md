@@ -19,7 +19,7 @@ Validated Controls:
 - Log ingestion verified in Log Analytics
 - Syslog events observable for detection testing
 
-- ## What This Deploys
+## What This Deploys
 - Resource Group (environment lifecycle and cost boundary)
 - Virtual Network (private address space boundary)
 - Public and private subnets (network segmentation)
